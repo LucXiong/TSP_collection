@@ -42,7 +42,7 @@ class PSO(object):
         tmp = [x for x in range(num_city)]
         result = []
         for i in range(num_total):
-            random.shuffle(tmp)
+            random.shuffle(tmp) # 随机排序列表
             result.append(tmp.copy())
         return result
 
@@ -115,7 +115,7 @@ class PSO(object):
         if l1<l2:
             return one, l1
         else:
-            return one, l2
+            return one2, l2
 
 
     # 粒子变异
@@ -174,7 +174,8 @@ class PSO(object):
             if self.global_best_len < self.best_l:
                 self.best_l = self.global_best_len
                 self.best_path = self.global_best
-            print(cnt)
+            print(cnt, self.best_l, end=': ')
+            print(self.best_path)
             self.iter_x.append(cnt)
             self.iter_y.append(self.best_l)
 
@@ -212,24 +213,26 @@ def read_tsp(path):
     data = tmp
     return data
 
+if __name__ == '__main__':
+	data = read_tsp('data/st70.tsp')
 
-data = read_tsp('data/st70.tsp')
+	data = np.array(data)
+	plt.suptitle('PSO in st70.tsp')
+	data = data[:, 1:]
+	plt.subplot(2, 2, 1)
+	plt.title('raw data')
+	# 加上一行因为会回到起点
+	show_data = np.vstack([data, data[0]])
+	plt.plot(data[:, 0], data[:, 1])
 
-data = np.array(data)
-plt.suptitle('PSO in st70.tsp')
-data = data[:, 1:]
-plt.subplot(2, 2, 1)
-plt.title('raw data')
-# 加上一行因为会回到起点
-show_data = np.vstack([data, data[0]])
-plt.plot(data[:, 0], data[:, 1])
+	pso = PSO(num_city=data.shape[0], data=data.copy())
+	# data.shape[0] # 返回第一列长度
+	# data.copy() # 完全复制data，同时内存地址改变
+	Best_path, Best = pso.run()
+	print(Best)
+	plt.subplot(2, 2, 3)
 
-pso = PSO(num_city=data.shape[0], data=data.copy())
-Best_path, Best = pso.run()
-print(Best)
-plt.subplot(2, 2, 3)
-
-Best_path = np.vstack([Best_path, Best_path[0]])
-plt.plot(Best_path[:, 0], Best_path[:, 1])
-plt.title('result')
-plt.show()
+	Best_path = np.vstack([Best_path, Best_path[0]])
+	plt.plot(Best_path[:, 0], Best_path[:, 1])
+	plt.title('result')
+	plt.show()
