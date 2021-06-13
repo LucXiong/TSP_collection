@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 class GA(object):
     def __init__(self, num_city, num_total, iteration, data):
         self.num_city = num_city
-        self.num_total = num_total
+        self.num_total = num_total # total number of fruits, which is like the "粒子数目" in PSO.py
         self.scores = []
         self.iteration = iteration
         self.location = data
-        self.ga_choose_ratio = 0.2
+        self.ga_choose_ratio = 0.2 # 继承父类比例
         self.mutate_ratio = 0.2
         # fruits中存每一个个体是下标的list
         self.fruits = self.random_init(num_total, num_city)
@@ -85,7 +85,7 @@ class GA(object):
         list = list[::-1]
         return list[:index], list[index:]
 
-    def ga_cross(self, x, y):
+    def ga_cross(self, x, y):# 路径交叉解决下标冲突的方式值得学习
         len_ = len(x)
         assert len(x) == len(y)
         path_list = [t for t in range(len_)]
@@ -236,26 +236,25 @@ def read_tsp(path):
     data = tmp
     return data
 
+if __name__ == '__main__':
+    data = read_tsp('data/st70.tsp')
+    data = np.array(data)
+    plt.suptitle('GA in st70.tsp')
+    data = data[:, 1:]
+    plt.subplot(2, 2, 1)
+    plt.title('raw data')
+    show_data = np.vstack([data, data[0]])
+    plt.plot(data[:, 0], data[:, 1])
+    Best, Best_path = math.inf, None
 
-data = read_tsp('data/st70.tsp')
-
-data = np.array(data)
-plt.suptitle('GA in st70.tsp')
-data = data[:, 1:]
-plt.subplot(2, 2, 1)
-plt.title('raw data')
-show_data = np.vstack([data, data[0]])
-plt.plot(data[:, 0], data[:, 1])
-Best, Best_path = math.inf, None
-
-foa = GA(num_city=data.shape[0], num_total=50, iteration=400, data=data.copy())
-path, path_len = foa.run()
-if path_len < Best:
-    Best = path_len
-    Best_path = path
-plt.subplot(2, 2, 3)
-# 加上一行因为会回到起点
-Best_path = np.vstack([Best_path, Best_path[0]])
-plt.plot(Best_path[:, 0], Best_path[:, 1])
-plt.title('result')
-plt.show()
+    foa = GA(num_city=data.shape[0], num_total=50, iteration=400, data=data.copy())
+    path, path_len = foa.run()
+    if path_len < Best:
+        Best = path_len
+        Best_path = path
+    plt.subplot(2, 2, 3)
+    # 加上一行因为会回到起点
+    Best_path = np.vstack([Best_path, Best_path[0]])
+    plt.plot(Best_path[:, 0], Best_path[:, 1])
+    plt.title('result')
+    plt.show()
