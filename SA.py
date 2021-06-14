@@ -81,7 +81,7 @@ class SA(object):
         x = min(a, b)
         y = max(a, b)
         a = fire[:x]
-        b = fire[x:y][::-1]
+        b = fire[x:y][::-1] # ::1表示本身；::-1表示倒置的本身 # Ref:https://blog.csdn.net/rosefun96/article/details/88807461
         c = fire[y:]
         return a + b + c
 
@@ -90,7 +90,7 @@ class SA(object):
         len1 = self.compute_pathlen(raw, self.dis_mat)
         len2 = self.compute_pathlen(get, self.dis_mat)
         dc = len2 - len1
-        p = max(1e-4, np.exp(-dc / temp))
+        p = max(1e-4, np.exp(-dc / temp))# p = max(1e-4, np.exp(-dc / temp)) # 温度越大，接受差的解的概率越大
         if len2 < len1:
             return get
         elif np.random.rand() <= p:
@@ -123,7 +123,7 @@ class SA(object):
                 best_length = min_length
                 best_path = min_path
             # 降低温度
-            self.T0 *= self.rate
+            self.T0 *= self.rate # 有不同的降温方式，比如：T(t)=T0/(1+t) or T(t)=T0/lg(1+t)
             # 记录路径收敛曲线
             self.iter_x.append(count)
             self.iter_y.append(best_length)
@@ -131,6 +131,7 @@ class SA(object):
 
     def run(self):
         best_length, best_path = self.sa()
+        print(best_length) # 输出最终结果
         plt.subplot(2, 2, 4)
         plt.title('convergence curve')
         plt.plot(self.iter_x, self.iter_y)
@@ -160,26 +161,29 @@ def read_tsp(path):
     data = tmp
     return data
 
+if __name__ == '__main__':
+	data = read_tsp('data/st70.tsp')
 
-data = read_tsp('data/st70.tsp')
+	data = np.array(data)
+	plt.suptitle('SA in st70.tsp')
+	data = data[:, 1:]
+	plt.subplot(2, 2, 1)
+	plt.title('raw data')
+	show_data = np.vstack([data, data[0]])
+	plt.plot(data[:, 0], data[:, 1])
+	Best, Best_path = math.inf, None
 
-data = np.array(data)
-plt.suptitle('SA in st70.tsp')
-data = data[:, 1:]
-plt.subplot(2, 2, 1)
-plt.title('raw data')
-show_data = np.vstack([data, data[0]])
-plt.plot(data[:, 0], data[:, 1])
-Best, Best_path = math.inf, None
+	foa = SA(num_city=data.shape[0], data=data.copy())
+	path, path_len = foa.run()
+	if path_len < Best:
+	    Best = path_len
+	    Best_path = path
+	plt.subplot(2, 2, 3)
+	# 加上一行因为会回到起点
+	Best_path = np.vstack([Best_path, Best_path[0]])
+	plt.plot(Best_path[:, 0], Best_path[:, 1])
+	plt.title('result')
+	plt.show()
 
-foa = SA(num_city=data.shape[0], data=data.copy())
-path, path_len = foa.run()
-if path_len < Best:
-    Best = path_len
-    Best_path = path
-plt.subplot(2, 2, 3)
-# 加上一行因为会回到起点
-Best_path = np.vstack([Best_path, Best_path[0]])
-plt.plot(Best_path[:, 0], Best_path[:, 1])
-plt.title('result')
-plt.show()
+# Ref:https://blog.csdn.net/wfrainn/article/details/80303138/?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-1&spm=1001.2101.3001.4242
+# Ref:https://blog.csdn.net/huahua19891221/article/details/81737053 可能能够跳出局部最优解
