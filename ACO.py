@@ -96,7 +96,7 @@ class ACO(object):
             for j in range(self.num_city - 1):
                 a = self.Table[i][j]
                 b = self.Table[i][j + 1]
-                delta_tau[a][b] = delta_tau[a][b] + self.Q / paths[i]
+                delta_tau[a][b] = delta_tau[a][b] + self.Q / paths[i] # 每一只蚂蚁经过ab城市，delta_tau[a][b]之间的信息素就会浓一点
             a = self.Table[i][0]
             b = self.Table[i][-1]
             delta_tau[a][b] = delta_tau[a][b] + self.Q / paths[i]
@@ -184,3 +184,5 @@ if __name__ == '__main__':
     plt.plot(Best_path[:, 0], Best_path[:, 1])
     plt.title('result')
     plt.show()
+
+# Ref:https://blog.csdn.net/weixin_44060222/article/details/102916573?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162364275616780271591638%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=162364275616780271591638&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-1-102916573.first_rank_v2_pc_rank_v29&utm_term=ACO&spm=1018.2226.3001.4187
