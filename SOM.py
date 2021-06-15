@@ -7,7 +7,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+# Self-Organizing Maps
 class SOM(object):
     def __init__(self, num_city, data):
         self.num_city = num_city
