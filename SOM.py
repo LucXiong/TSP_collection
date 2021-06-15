@@ -7,7 +7,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Self-Organizing Maps
+
 class SOM(object):
     def __init__(self, num_city, data):
         self.num_city = num_city
@@ -27,13 +27,13 @@ class SOM(object):
         initial offset and normalizing the points in a proportional interval: [0,1]
         on y, maintining the original ratio on x.
         """
-        ratio = (points[:, 0].max() - points[:, 1].min()) / (points[:, 1].max() - points[:, 1].min()), 1 # ratio is a tuple (xxx, 1)
-        ratio = np.array(ratio) / max(ratio) # ratio归一化，由于此处例子的最大值为1，所以值未变
-        m = lambda c: (c - c.min()) / (c.max() - c.min()) # c.max() is the max value in c(all dimensions)
+        ratio = (points[:, 0].max() - points[:, 1].min()) / (points[:, 1].max() - points[:, 1].min()), 1
+        ratio = np.array(ratio) / max(ratio)
+        m = lambda c: (c - c.min()) / (c.max() - c.min())
         norm = m(points)
         # norm = points.apply(lambda c: (c - c.min()) / (c.max() - c.min()))
         m = lambda p: ratio * p
-        return m(norm) # 第一列等比例缩小，第二列乘1故不变
+        return m(norm)
         # return norm.apply(lambda p: ratio * p, axis=1)
 
     def generate_network(self, size):
@@ -74,7 +74,7 @@ class SOM(object):
         """Return the array of distances of two numpy arrays of points."""
         return np.linalg.norm(a - b, axis=1)
 
-    def route_distance(self, cities): # 没用上？
+    def route_distance(self, cities):
         """Return the cost of traversing a route of cities in a certain order."""
         points = cities[['x', 'y']]
         distances = self.euclidean_distance(points, np.roll(points, 1, axis=0))
@@ -116,20 +116,20 @@ class SOM(object):
 
     def smo(self):
         citys = self.normalize(self.location)
-        n = citys.shape[0] * 8 # 为啥乘8？
+        n = citys.shape[0] * 8
         network = self.generate_network(n)
 
         for i in range(self.iteraton):
             index = np.random.randint(self.num_city - 1)
             city = citys[index]
             winner_idx = self.select_closest(network, city)
-                                            # 获胜神经元  优胜邻域  全局空间
+
             gaussian = self.get_neighborhood(winner_idx, n // 10, network.shape[0])
-                                    # 增加维度 Ref:https://blog.csdn.net/weixin_40271376/article/details/80611608
+
             network += gaussian[:, np.newaxis] * self.learning_rate * (city - network)
 
             self.learning_rate = self.learning_rate * 0.99997
-            n = n * 0.9997 # 缩小优胜邻域
+            n = n * 0.9997
             if n < 1:
                 break
             route = self.get_route(citys, network)
@@ -151,12 +151,7 @@ class SOM(object):
         return self.best_length, self.best_path
 
     def run(self):
-        self.best_length, self.best_path = self.smo
-        path = self.location[self.best_path]
-        # 画出最终路径
-        plt.subplot(2, 2, 4)
-        plt.title('convergence curve')
-        plt.plot(self.iter_x, self.iter_y)
+        self.best_length, self.best_path = self.smo()
         return self.location[self.best_path], self.best_length
 
 
@@ -184,25 +179,30 @@ def read_tsp(path):
     return data
 
 if __name__ == '__main__':
-    data = read_tsp('data/st70.tsp')
+	filename = 'st70.tsp'
+	data = read_tsp('data/'+filename)
 
-    data = np.array(data)
-    plt.suptitle('PSO in st70.tsp')
-    data = data[:, 1:]
-    plt.subplot(2, 2, 1)
-    plt.title('raw data')
-    # 加上一行因为会回到起点
-    show_data = np.vstack([data, data[0]])
-    plt.plot(data[:, 0], data[:, 1])
+	data = np.array(data)
+	plt.suptitle('SMO in '+filename)
+	data = data[:, 1:]
+	plt.subplot(2, 2, 1)
+	plt.title('raw data')
+	# 加上一行因为会回到起点
+	show_data = np.vstack([data, data[0]])
+	plt.plot(data[:, 0], data[:, 1])
 
-    som = SOM(num_city=data.shape[0], data=data.copy())
-    Best_path, Best_length = som.run()
-    print(Best_length)
-    # print()
-    plt.subplot(2, 2, 3)
-    Best_path = np.vstack([Best_path, Best_path[0]])
-    plt.plot(Best_path[:, 0], Best_path[:, 1])
-    plt.title('result')
-    plt.show()
+	model = SOM(num_city=data.shape[0], data=data.copy())
+	Best_path, Best_length = model.run()
 
-# Ref:https://blog.csdn.net/weixin_38347387/article/details/80342662?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162373813316780265455002%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=162373813316780265455002&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-80342662.first_rank_v2_pc_rank_v29&utm_term=som&spm=1018.2226.3001.4187
+
+	Best_path = np.vstack([Best_path, Best_path[0]])
+	fig, axs = plt.subplots(2, 1, sharex=False, sharey=False)
+	axs[0].scatter(Best_path[:, 0], Best_path[:,1])
+	Best_path = np.vstack([Best_path, Best_path[0]])
+	axs[0].plot(Best_path[:, 0], Best_path[:, 1])
+	axs[0].set_title('规划结果')
+	iterations = model.iter_x
+	best_record = model.iter_y
+	axs[1].plot(iterations, best_record)
+	axs[1].set_title('收敛曲线')
+	plt.show()
