@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class TS(object):
     def __init__(self, num_city, data):
-        self.taboo_size = 80
+        self.taboo_size = 80 # 禁忌表寸有解数目
         self.iteration = 1000
         self.num_city = num_city
         self.location = data
@@ -67,7 +67,7 @@ class TS(object):
             result.append(length)
         return result
 
-    # 产生随机解
+    # 产生随机解 # 如此产生随机解是不是会导致计算量增大？ # 此处邻域解全部作为候选解？
     def ts_search(self, x):
         moves = []
         new_paths = []
@@ -82,7 +82,7 @@ class TS(object):
     # 禁忌搜索
     def ts(self):
         for cnt in range(self.iteration):
-            new_paths, moves = self.ts_search(self.cur_path)
+            new_paths, moves = self.ts_search(self.cur_path) # 生成邻域解，并全部作为候选解
             new_lengths = self.compute_paths(new_paths)
             sort_index = np.argsort(new_lengths)
             min_l = new_lengths[sort_index[0]]
@@ -95,23 +95,23 @@ class TS(object):
                 self.best_path = min_path
                 self.cur_path = min_path
                 # 更新禁忌表
-                if min_move in self.taboo:
+                if min_move in self.taboo: # 移动当前最佳路径的move至禁忌表的首位(Line98-101)
                     self.taboo.remove(min_move)
 
                 self.taboo.append(min_move)
             else:
                 # 找到不在禁忌表中的操作
-                while min_move in self.taboo:
+                while min_move in self.taboo: # 若候选解的最佳值小于历史最佳，则从候选解依次（优→劣）查询不在禁忌表中的move
                     sort_index = sort_index[1:]
                     min_l = new_lengths[sort_index[0]]
                     min_path = new_paths[sort_index[0]]
                     min_move = moves[sort_index[0]]
                 self.cur_path = min_path
-                assert self.cur_path != self.best_path
+                assert self.cur_path != self.best_path # 检查条件，不符合就终止程序
                 self.taboo.append(min_move)
             # 禁忌表超长了
             if len(self.taboo) > self.taboo_size:
-                self.taboo = self.taboo[1:]
+                self.taboo = self.taboo[1:] # 移除最后一位
             self.iter_x.append(cnt)
             self.iter_y.append(self.best_length)
             print(cnt, self.best_length)
@@ -167,3 +167,6 @@ if __name__ == '__main__':
 	plt.plot(best_path[:, 0], best_path[:, 1])
 	plt.title('result')
 	plt.show()
+
+# Ref:https://blog.csdn.net/mxr2026588745/article/details/106979818?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522162365946416780261931606%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=162365946416780261931606&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-106979818.first_rank_v2_pc_rank_v29&utm_term=TS%E7%AE%97%E6%B3%95&spm=1018.2226.3001.4187
+# Ref:https://blog.csdn.net/qq_44384577/article/details/105190912
