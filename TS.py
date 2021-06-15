@@ -148,22 +148,22 @@ def read_tsp(path):
     data = tmp
     return data
 
+if __name__ == '__main__':
+	data = read_tsp('data/st70.tsp')
 
-data = read_tsp('data/st70.tsp')
+	data = np.array(data)
+	plt.suptitle('TS in st70.tsp')
+	data = data[:, 1:]
+	plt.subplot(2, 2, 1)
+	plt.title('raw data')
+	show_data = np.vstack([data, data[0]])
+	plt.plot(data[:, 0], data[:, 1])
 
-data = np.array(data)
-plt.suptitle('TS in st70.tsp')
-data = data[:, 1:]
-plt.subplot(2, 2, 1)
-plt.title('raw data')
-show_data = np.vstack([data, data[0]])
-plt.plot(data[:, 0], data[:, 1])
-
-func = TS(num_city=data.shape[0], data=data.copy())
-best_path, best_length = func.run()
-plt.subplot(2, 2, 3)
-# 加上一行因为会回到起点
-best_path = np.vstack([best_path, best_path[0]])
-plt.plot(best_path[:, 0], best_path[:, 1])
-plt.title('result')
-plt.show()
+	func = TS(num_city=data.shape[0], data=data.copy())
+	best_path, best_length = func.run()
+	plt.subplot(2, 2, 3)
+	# 加上一行因为会回到起点
+	best_path = np.vstack([best_path, best_path[0]])
+	plt.plot(best_path[:, 0], best_path[:, 1])
+	plt.title('result')
+	plt.show()
